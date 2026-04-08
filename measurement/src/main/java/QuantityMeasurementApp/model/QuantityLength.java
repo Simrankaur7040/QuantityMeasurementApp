@@ -27,6 +27,32 @@ public class QuantityLength{
         return targetUnit.fromfeet(valueInFeet);
     }
 
+
+    public double getValue() {
+        return value;
+    }
+
+//    overloadMethod
+    QuantityLength add(QuantityLength Q1,QuantityLength Q2)
+    {
+        return  Q1.add(Q2);
+    }
+
+    public QuantityLength add(QuantityLength other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Second operand cannot be null");
+        }
+        // Convert both to base (feet)
+        double thisInFeet = this.unit.toFeet(this.value);
+        double otherInFeet = other.unit.toFeet(other.getValue());
+        // Add
+        double sumInFeet = thisInFeet + otherInFeet;
+        // Convert back to unit of first operand
+        double resultValue = this.unit.fromfeet(sumInFeet);
+        return new QuantityLength(resultValue, this.unit);
+    }
+
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
