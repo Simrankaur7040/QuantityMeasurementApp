@@ -1,0 +1,85 @@
+package QuantityMeasurementApp.model;
+
+import QuantityMeasurementApp.enums.IMeasurable;
+import java.util.Objects;
+
+public class Quantity<U extends IMeasurable> {
+
+    private static final double EPSILON = 1e-6;
+
+    private final double value;
+    private final U unit;
+
+    public Quantity(double value, U unit) {
+        if (unit == null)
+            throw new IllegalArgumentException("Unit cannot be null");
+
+        if (!Double.isFinite(value))
+            throw new IllegalArgumentException("Invalid value");
+
+        this.value = value;
+        this.unit = unit;
+    }
+
+    public double getValue() {
+        return value;
+    }
+
+    public U getUnit() {
+        return unit;
+    }
+
+    // Convert
+    public Quantity<U> convertTo(U targetUnit) {
+        double base = unit.convertToBaseUnit(value);
+        double converted = targetUnit.convertFromBaseUnit(base);
+        return new Quantity<>(converted, targetUnit);
+    }
+
+    // Add (same unit)
+    public Quantity<U> add(Quantity<U> other) {
+        return add(other, this.unit);
+    }
+
+    // Add (target unit)
+    public Quantity<U> add(Quantity<U> other, U targetUnit) {
+        if(other==null || targetUnit==null) {
+            throw new NullPointerException("Second Qunatity and third quantity cannot be null");
+        }
+        double sumBase =
+                this.unit.convertToBaseUnit(this.value) +
+                        other.unit.convertToBaseUnit(other.value);
+
+        double result = targetUnit.convertFromBaseUnit(sumBase);
+
+        return new Quantity<>(result, targetUnit);
+    }
+
+    // Equals with cross-category safety
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        Quantity<?> that = (Quantity<?>) obj;
+
+        // ❗ Prevent Length vs Weight comparison
+        if (this.unit.getClass() != that.unit.getClass()) return false;
+
+        double v1 = this.unit.convertToBaseUnit(this.value);
+        double v2 = that.unit.convertToBaseUnit(that.value);
+
+        return Math.abs(v1 - v2) < EPSILON;
+    }
+
+    @Override
+    public int hashCode() {
+        double base=unit.convertToBaseUnit(value);
+        return Objects.hash(Math.round(base/EPSILON));
+    }
+
+    @Override
+    public String toString() {
+        return value + " " + unit.getUnitName();
+    }
+}

@@ -1,41 +1,32 @@
-package QuantityMeasurementApp;
 
-import QuantityMeasurementApp.enums.LengthUnit;
-import QuantityMeasurementApp.enums.WeightUnit;
-import QuantityMeasurementApp.model.QuantityLength;
-import QuantityMeasurementApp.model.QuantityWeight;
+import QuantityMeasurementApp.enumsimplm.LengthUnit;
+import QuantityMeasurementApp.enumsimplm.WeightUnit;
+import QuantityMeasurementApp.model.Quantity;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@SpringBootApplication
 public class MeasurementApplication {
 
     public static void main(String[] args) {
+        SpringApplication.run(MeasurementApplication.class, args);
 
-        // ================= LENGTH =================
-        QuantityLength q1 = new QuantityLength(1, LengthUnit.FEET);
-        QuantityLength q2 = new QuantityLength(12, LengthUnit.INCH);
+        // LENGTH
+        Quantity<LengthUnit> length1 = new Quantity<>(1.0, LengthUnit.FEET);
+        Quantity<LengthUnit> length2 = new Quantity<>(12.0, LengthUnit.INCH);
 
-        System.out.println(q1 + " and " + q2 + " Equal (" + q1.equals(q2) + ")");
+        boolean isEqualLength = length1.equals(length2);
+        Quantity<LengthUnit> sumLength = length1.add(length2);
+        Quantity<LengthUnit> convertedLength = length1.convertTo(LengthUnit.INCH);
 
-        QuantityLength q3 = new QuantityLength(1, LengthUnit.INCH);
-        QuantityLength q4 = new QuantityLength(1, LengthUnit.INCH);
+        // WEIGHT
+        Quantity<WeightUnit> weight1 = new Quantity<>(1.0, WeightUnit.KILOGRAM);
+        Quantity<WeightUnit> weight2 = new Quantity<>(1000.0, WeightUnit.GRAM);
 
-        System.out.println(q3 + " and " + q4 + " Equal (" + q3.equals(q4) + ")");
+        boolean isEqualWeight = weight1.equals(weight2);
+        Quantity<WeightUnit> sumWeight = weight1.add(weight2);
+        Quantity<WeightUnit> convertedWeight = weight1.convertTo(WeightUnit.GRAM);
 
 
-        // ================= UC9: WEIGHT =================
-        QuantityWeight w1 = new QuantityWeight(1, WeightUnit.KILOGRAM);
-        QuantityWeight w2 = new QuantityWeight(1000, WeightUnit.GRAM);
-
-        System.out.println("\nWeight:");
-        System.out.println(w1 + " and " + w2 + " Equal (" + w1.equals(w2) + ")");
-
-        // Conversion
-        System.out.println("1 KG in Gram = " + w1.convert(WeightUnit.GRAM));
-
-        // Addition
-        QuantityWeight w3 = new QuantityWeight(500, WeightUnit.GRAM);
-        System.out.println("1 KG + 500 G = " + w1.add(w3));
-
-        // Category safety
-        System.out.println("1 KG == 1 FEET ? " + w1.equals(q1));
     }
 }
