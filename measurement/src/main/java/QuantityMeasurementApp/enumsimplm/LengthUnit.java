@@ -14,12 +14,12 @@ public enum LengthUnit implements IMeasurable {
         this.toFeetFactor = toFeetFactor;
     }
 
-    @Override
+
     public double getConversionFactor() {
         return toFeetFactor;
     }
 
-    @Override
+
     public double convertToBaseUnit(double value) {
         if (!Double.isFinite(value)) {
             throw new IllegalArgumentException("Invalid value");
@@ -27,7 +27,7 @@ public enum LengthUnit implements IMeasurable {
         return value * toFeetFactor;
     }
 
-    @Override
+
     public double convertFromBaseUnit(double value) {
         if (!Double.isFinite(value)) {
             throw new IllegalArgumentException("Invalid value");
@@ -35,7 +35,7 @@ public enum LengthUnit implements IMeasurable {
         return value / toFeetFactor;
     }
 
-    @Override
+
     public String getUnitName() {
         return this.name();
     }

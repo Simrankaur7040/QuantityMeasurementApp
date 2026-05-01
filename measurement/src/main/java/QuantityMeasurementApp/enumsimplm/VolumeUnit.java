@@ -14,7 +14,7 @@ public enum VolumeUnit implements IMeasurable {
         this.factor = factor;
     }
 
-    @Override
+
     public double convertToBaseUnit(double value) {
         if (!Double.isFinite(value))
             throw new IllegalArgumentException("Invalid value");
@@ -22,7 +22,7 @@ public enum VolumeUnit implements IMeasurable {
         return value * factor;
     }
 
-    @Override
+
     public double convertFromBaseUnit(double baseValue) {
         if (!Double.isFinite(baseValue))
             throw new IllegalArgumentException("Invalid value");
@@ -30,12 +30,11 @@ public enum VolumeUnit implements IMeasurable {
         return baseValue / factor;
     }
 
-    @Override
     public double getConversionFactor() {
         return factor;
     }
 
-    @Override
+
     public String getUnitName() {
         return this.name();
     }

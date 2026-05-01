@@ -14,12 +14,12 @@ public enum WeightUnit implements IMeasurable {
         this.conversionFactor = conversionFactor;
     }
 
-    @Override
+
     public double getConversionFactor() {
         return conversionFactor;
     }
 
-    @Override
+
     public double convertToBaseUnit(double value) {
         if (!Double.isFinite(value))
             throw new IllegalArgumentException("Invalid value");
@@ -27,7 +27,7 @@ public enum WeightUnit implements IMeasurable {
         return value * conversionFactor;
     }
 
-    @Override
+
     public double convertFromBaseUnit(double value) {
         if (!Double.isFinite(value))
             throw new IllegalArgumentException("Invalid value");
