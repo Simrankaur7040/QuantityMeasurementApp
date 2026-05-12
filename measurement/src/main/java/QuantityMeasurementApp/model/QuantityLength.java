@@ -6,6 +6,11 @@ public class QuantityLength {
     private final Quantity<LengthUnit> quantity;
 
     public QuantityLength(double value, LengthUnit unit) {
+
+        if (!Double.isFinite(value)) {
+            throw new IllegalArgumentException("Invalid value");
+        }
+
         this.quantity = new Quantity<>(value, unit);
     }
 

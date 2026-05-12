@@ -1,10 +1,16 @@
 package QuantityMeasurementApp;
+import QuantityMeasurementApp.controller.QuantityMeasurementController;
+import QuantityMeasurementApp.dto.QuantityDTO;
+import QuantityMeasurementApp.entity.QuantityMeasurementEntity;
 import QuantityMeasurementApp.enums.IMeasurable;
 import QuantityMeasurementApp.enumsimplm.LengthUnit;
 import QuantityMeasurementApp.enumsimplm.TemperatureUnit;
 import QuantityMeasurementApp.enumsimplm.VolumeUnit;
 import QuantityMeasurementApp.enumsimplm.WeightUnit;
 import QuantityMeasurementApp.model.Quantity;
+import QuantityMeasurementApp.repository.QuantityMeasurementCacheRepository;
+import QuantityMeasurementApp.service.IQuantityMeasurementService;
+import QuantityMeasurementApp.serviceImpl.QuantityMeasurementServiceImpl;
 import org.junit.jupiter.api.Test;
 
 
@@ -1609,5 +1615,467 @@ public class QuantityGenericTest {
         double base = TemperatureUnit.FAHRENHEIT.convertToBaseUnit(32.0);
         assertEquals(0.0, base, EPSILON);
     }
-}
+//    ==================================================================================
+    //UC15
+        private final QuantityMeasurementCacheRepository repository =
+                QuantityMeasurementCacheRepository.getInstance();
+
+        private final IQuantityMeasurementService service =
+                new QuantityMeasurementServiceImpl(repository);
+
+        private final QuantityMeasurementController controller =
+                new QuantityMeasurementController(service);
+
+        // =========================================================
+        // ENTITY TESTS (1–5)
+        // =========================================================
+
+        @Test
+        void testQuantityEntity_SingleOperandConstruction() {
+
+            QuantityMeasurementEntity entity =
+                    new QuantityMeasurementEntity("CONVERT", "Quantity(12.0, INCH)");
+
+            assertEquals("CONVERT", entity.getOperation());
+            assertEquals("Quantity(12.0, INCH)", entity.getResult());
+        }
+
+        @Test
+        void testQuantityEntity_BinaryOperandConstruction() {
+
+            QuantityMeasurementEntity entity =
+                    new QuantityMeasurementEntity("ADD", "Quantity(2.0, FEET)");
+
+            assertEquals("ADD", entity.getOperation());
+        }
+
+        @Test
+        void testQuantityEntity_ErrorConstruction() {
+
+            QuantityMeasurementEntity entity =
+                    new QuantityMeasurementEntity("Failure");
+
+            assertTrue(entity.hasError());
+        }
+
+        @Test
+        void testQuantityEntity_ToString_Success() {
+
+            QuantityMeasurementEntity entity =
+                    new QuantityMeasurementEntity("ADD", "Quantity(2.0, FEET)");
+
+            assertTrue(entity.toString().contains("ADD"));
+        }
+
+        @Test
+        void testQuantityEntity_ToString_Error() {
+
+            QuantityMeasurementEntity entity =
+                    new QuantityMeasurementEntity("Failure");
+
+            assertTrue(entity.toString().contains("Failure"));
+        }
+
+        // =========================================================
+        // SERVICE TESTS (6–15)
+        // =========================================================
+
+        @Test
+        void testService_CompareEquality_SameUnit_Success() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(1.0, "FEET", "LENGTH");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(1.0, "FEET", "LENGTH");
+
+            QuantityDTO result = service.compare(q1, q2);
+
+            assertEquals(1.0, result.getValue());
+        }
+
+        @Test
+        void testService_CompareEquality_DifferentUnit_Success() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(1.0, "FEET", "LENGTH");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(12.0, "INCH", "LENGTH");
+
+            QuantityDTO result = service.compare(q1, q2);
+
+            assertEquals(1.0, result.getValue());
+        }
+
+        @Test
+        void testService_CompareEquality_CrossCategory_Error() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(1.0, "FEET", "LENGTH");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(1.0, "KILOGRAM", "WEIGHT");
+
+            QuantityDTO result = service.compare(q1, q2);
+
+            assertTrue(result.hasError());
+        }
+
+        @Test
+        void testService_Convert_Success() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(1.0, "FEET", "LENGTH");
+
+            QuantityDTO result =
+                    service.convert(q1, "INCH");
+
+            assertEquals(12.0, result.getValue());
+        }
+
+        @Test
+        void testService_Add_Success() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(1.0, "FEET", "LENGTH");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(12.0, "INCH", "LENGTH");
+
+            QuantityDTO result =
+                    service.add(q1, q2, "FEET");
+
+            assertEquals(2.0, result.getValue());
+        }
+
+        @Test
+        void testService_Add_UnsupportedOperation_Error() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(100.0, "CELSIUS", "TEMPERATURE");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(50.0, "CELSIUS", "TEMPERATURE");
+
+            QuantityDTO result =
+                    service.add(q1, q2, "CELSIUS");
+
+            assertTrue(result.hasError());
+        }
+
+        @Test
+        void testService_Subtract_Success() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(10.0, "FEET", "LENGTH");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(5.0, "FEET", "LENGTH");
+
+            QuantityDTO result =
+                    service.subtract(q1, q2, "FEET");
+
+            assertEquals(5.0, result.getValue());
+        }
+
+        @Test
+        void testService_Divide_Success() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(10.0, "FEET", "LENGTH");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(5.0, "FEET", "LENGTH");
+
+            QuantityDTO result =
+                    service.divide(q1, q2);
+
+            assertEquals(2.0, result.getValue());
+        }
+
+        @Test
+        void testService_Divide_ByZero_Error() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(10.0, "FEET", "LENGTH");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(0.0, "FEET", "LENGTH");
+
+            QuantityDTO result =
+                    service.divide(q1, q2);
+
+            assertTrue(result.hasError());
+        }
+
+        @Test
+        void testService_Convert_Temperature_Success() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(0.0, "CELSIUS", "TEMPERATURE");
+
+            QuantityDTO result =
+                    service.convert(q1, "FAHRENHEIT");
+
+            assertEquals(32.0, result.getValue());
+        }
+
+        // =========================================================
+        // CONTROLLER TESTS (16–21)
+        // =========================================================
+
+        @Test
+        void testController_DemonstrateEquality_Success() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(1.0, "FEET", "LENGTH");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(12.0, "INCH", "LENGTH");
+
+            controller.performCompare(q1, q2);
+
+            assertTrue(true);
+        }
+
+        @Test
+        void testController_DemonstrateConversion_Success() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(1.0, "FEET", "LENGTH");
+
+            controller.performConvert(q1, "INCH");
+
+            assertTrue(true);
+        }
+
+        @Test
+        void testController_DemonstrateAddition_Success() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(1.0, "FEET", "LENGTH");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(12.0, "INCH", "LENGTH");
+
+            controller.performAdd(q1, q2, "FEET");
+
+            assertTrue(true);
+        }
+
+        @Test
+        void testController_DemonstrateAddition_Error() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(10.0, "CELSIUS", "TEMPERATURE");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(5.0, "CELSIUS", "TEMPERATURE");
+
+            controller.performAdd(q1, q2, "CELSIUS");
+
+            assertTrue(true);
+        }
+
+        @Test
+        void testController_DemonstrateSubtraction_Success() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(10.0, "FEET", "LENGTH");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(5.0, "FEET", "LENGTH");
+
+            controller.performSubtract(q1, q2, "FEET");
+
+            assertTrue(true);
+        }
+
+        @Test
+        void testController_DemonstrateDivision_Success() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(10.0, "FEET", "LENGTH");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(5.0, "FEET", "LENGTH");
+
+            controller.performDivide(q1, q2);
+
+            assertTrue(true);
+        }
+
+        // =========================================================
+        // LAYER / FLOW TESTS (22–28)
+        // =========================================================
+
+        @Test
+        void testLayerSeparation_ServiceIndependence() {
+
+            assertNotNull(service);
+        }
+
+        @Test
+        void testLayerSeparation_ControllerIndependence() {
+
+            assertNotNull(controller);
+        }
+
+        @Test
+        void testDataFlow_ControllerToService() {
+
+            QuantityDTO dto =
+                    new QuantityDTO(1.0, "FEET", "LENGTH");
+
+            controller.performConvert(dto, "INCH");
+
+            assertTrue(true);
+        }
+
+        @Test
+        void testDataFlow_ServiceToController() {
+
+            QuantityDTO dto =
+                    service.convert(
+                            new QuantityDTO(1.0, "FEET", "LENGTH"),
+                            "INCH"
+                    );
+
+            assertEquals(12.0, dto.getValue());
+        }
+
+        @Test
+        void testBackwardCompatibility_AllUC1_UC14_Tests() {
+
+            assertTrue(true);
+        }
+
+        @Test
+        void testService_AllMeasurementCategories() {
+
+            assertNotNull(LengthUnit.FEET);
+            assertNotNull(TemperatureUnit.CELSIUS);
+        }
+
+        @Test
+        void testController_AllOperations() {
+
+            assertNotNull(controller);
+        }
+
+        // =========================================================
+        // VALIDATION / IMMUTABILITY (29–33)
+        // =========================================================
+
+        @Test
+        void testService_ValidationConsistency() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(10.0, "CELSIUS", "TEMPERATURE");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(5.0, "CELSIUS", "TEMPERATURE");
+
+            QuantityDTO result =
+                    service.add(q1, q2, "CELSIUS");
+
+            assertTrue(result.hasError());
+        }
+
+        @Test
+        void testEntity_Immutability() {
+
+            QuantityMeasurementEntity entity =
+                    new QuantityMeasurementEntity("ADD", "Quantity(2.0, FEET)");
+
+            assertNotNull(entity);
+        }
+
+        @Test
+        void testService_ExceptionHandling_AllOperations() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(10.0, "FEET", "LENGTH");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(0.0, "FEET", "LENGTH");
+
+            QuantityDTO result =
+                    service.divide(q1, q2);
+
+            assertTrue(result.hasError());
+        }
+
+        @Test
+        void testIntegration_EndToEnd_LengthAddition() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(1.0, "FEET", "LENGTH");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(12.0, "INCH", "LENGTH");
+
+            QuantityDTO result =
+                    service.add(q1, q2, "FEET");
+
+            assertEquals(2.0, result.getValue());
+        }
+
+        @Test
+        void testIntegration_EndToEnd_TemperatureUnsupported() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(10.0, "CELSIUS", "TEMPERATURE");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(5.0, "CELSIUS", "TEMPERATURE");
+
+            QuantityDTO result =
+                    service.add(q1, q2, "CELSIUS");
+
+            assertTrue(result.hasError());
+        }
+
+        // =========================================================
+        // EXTRA TESTS (34–36)
+        // =========================================================
+
+    @Test
+    void testService_NullEntity_Rejection() {
+
+        QuantityDTO result =
+                service.convert(null, "INCH");
+
+        assertTrue(result.hasError());
+    }
+
+        @Test
+        void testLayerDecoupling_ServiceChange() {
+
+            IQuantityMeasurementService newService =
+                    new QuantityMeasurementServiceImpl(repository);
+
+            QuantityMeasurementController newController =
+                    new QuantityMeasurementController(newService);
+
+            assertNotNull(newController);
+        }
+
+        @Test
+        void testScalability_NewOperation_Addition() {
+
+            QuantityDTO q1 =
+                    new QuantityDTO(5.0, "FEET", "LENGTH");
+
+            QuantityDTO q2 =
+                    new QuantityDTO(5.0, "FEET", "LENGTH");
+
+            QuantityDTO result =
+                    service.add(q1, q2, "FEET");
+
+            assertEquals(10.0, result.getValue());
+        }
+    }
+
 

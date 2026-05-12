@@ -1,32 +1,21 @@
-
-import QuantityMeasurementApp.enumsimplm.LengthUnit;
-import QuantityMeasurementApp.enumsimplm.WeightUnit;
-import QuantityMeasurementApp.model.Quantity;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
+package QuantityMeasurementApp.app;
+import QuantityMeasurementApp.controller.QuantityMeasurementController;
+import QuantityMeasurementApp.dto.QuantityDTO;
+import QuantityMeasurementApp.repository.QuantityMeasurementCacheRepository;
+import QuantityMeasurementApp.serviceImpl.QuantityMeasurementServiceImpl;
 public class MeasurementApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MeasurementApplication.class, args);
-
-        // LENGTH
-        Quantity<LengthUnit> length1 = new Quantity<>(1.0, LengthUnit.FEET);
-        Quantity<LengthUnit> length2 = new Quantity<>(12.0, LengthUnit.INCH);
-
-        boolean isEqualLength = length1.equals(length2);
-        Quantity<LengthUnit> sumLength = length1.add(length2);
-        Quantity<LengthUnit> convertedLength = length1.convertTo(LengthUnit.INCH);
-
-        // WEIGHT
-        Quantity<WeightUnit> weight1 = new Quantity<>(1.0, WeightUnit.KILOGRAM);
-        Quantity<WeightUnit> weight2 = new Quantity<>(1000.0, WeightUnit.GRAM);
-
-        boolean isEqualWeight = weight1.equals(weight2);
-        Quantity<WeightUnit> sumWeight = weight1.add(weight2);
-        Quantity<WeightUnit> convertedWeight = weight1.convertTo(WeightUnit.GRAM);
-
-
+        QuantityMeasurementCacheRepository repository =
+                QuantityMeasurementCacheRepository.getInstance();
+        QuantityMeasurementServiceImpl service =
+                new QuantityMeasurementServiceImpl(repository);
+        QuantityMeasurementController controller =
+                new QuantityMeasurementController(service);
+        QuantityDTO feet =
+                new QuantityDTO(1.0, "FEET", "LENGTH");
+        QuantityDTO inches =
+                new QuantityDTO(12.0, "INCH", "LENGTH");
+        controller.performAdd(feet, inches, "FEET");
     }
 }
