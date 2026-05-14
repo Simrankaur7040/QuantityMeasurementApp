@@ -5,37 +5,29 @@ public class QuantityDTO {
     private String measurementType;
     private boolean error;
     private String errorMessage;
-    public QuantityDTO(double value, String unit, String measurementType) {
+
+    public QuantityDTO(double value, String unit, String measurementType){
         this.value = value;
         this.unit = unit;
         this.measurementType = measurementType;
     }
-    public static QuantityDTO error(String message) {
-        QuantityDTO dto = new QuantityDTO(0, "ERROR", "ERROR");
-        dto.error = true;
-        dto.errorMessage = message;
-        return dto;
+    public QuantityDTO(boolean error, String errorMessage){
+        this.error = error;
+        this.errorMessage = errorMessage;
     }
-    public double getValue() {
+    public double getValue(){
         return value;
     }
-    public String getUnit() {
+    public String getUnit(){
         return unit;
     }
-    public String getMeasurementType() {
+    public String getMeasurementType(){
         return measurementType;
     }
-    public boolean hasError() {
-
+    public boolean hasError(){
         return error;
     }
-    public String getErrorMessage() {
+    public String getErrorMessage(){
         return errorMessage;
-    }
-    @Override
-    public String toString() {
-        if (error)
-            return "Error: " + errorMessage;
-        return "Quantity(" + value + ", " + unit + ")";
     }
 }

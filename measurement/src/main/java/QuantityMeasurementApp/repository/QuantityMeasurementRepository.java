@@ -1,7 +1,9 @@
 package QuantityMeasurementApp.repository;
 import QuantityMeasurementApp.entity.QuantityMeasurementEntity;
 import java.util.List;
-public interface IQuantityMeasurementRepository {
+public interface QuantityMeasurementRepository {
     void save(QuantityMeasurementEntity entity);
-    List<QuantityMeasurementEntity> findAll();
+    List<QuantityMeasurementEntity> getAllMeasurements();
+    void deleteAll();
+    int getTotalCount();
 }
