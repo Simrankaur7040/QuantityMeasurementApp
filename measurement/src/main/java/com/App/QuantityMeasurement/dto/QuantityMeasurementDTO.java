@@ -1,36 +1,30 @@
-package com.App.QuantityMeasurement.model;
-import jakarta.persistence.*;
-@Entity
-@Table(name = "quantity_measurements")
-public class QuantityMeasurementEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+package com.App.QuantityMeasurement.dto;
+import com.App.QuantityMeasurement.model.QuantityMeasurementEntity;
+public class QuantityMeasurementDTO {
+
     private String operation;
-    @Column(length = 255)
     private String input;
-    @Column(length = 255)
     private String result;
     private boolean error;
-    public QuantityMeasurementEntity() {
+    public QuantityMeasurementDTO() {
     }
-    public QuantityMeasurementEntity(Long id,
-                                     String operation,
-                                     String input,
-                                     String result,
-
-                                     boolean error) {
-        this.id = id;
+    public QuantityMeasurementDTO(String operation,
+                                  String input,
+                                  String result,
+                                  boolean error) {
         this.operation = operation;
         this.input = input;
         this.result = result;
         this.error = error;
     }
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
+    public static QuantityMeasurementDTO fromEntity(QuantityMeasurementEntity
+                                                            entity) {
+        return new QuantityMeasurementDTO(
+                entity.getOperation(),
+                entity.getInput(),
+                entity.getResult(),
+                entity.isError()
+        );
     }
     public String getOperation() {
         return operation;

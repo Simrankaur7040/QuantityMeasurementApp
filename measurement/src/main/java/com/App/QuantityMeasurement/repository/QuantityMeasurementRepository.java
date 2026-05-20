@@ -1,9 +1,17 @@
 package com.App.QuantityMeasurement.repository;
-import com.App.QuantityMeasurement.entity.QuantityMeasurementEntity;
+
+import com.App.QuantityMeasurement.model.QuantityMeasurementEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import java.util.List;
-public interface QuantityMeasurementRepository {
-    void save(QuantityMeasurementEntity entity);
-    List<QuantityMeasurementEntity> getAllMeasurements();
-    void deleteAll();
-    int getTotalCount();
+
+@Repository
+public interface QuantityMeasurementRepository
+        extends JpaRepository<QuantityMeasurementEntity, Long> {
+
+    List<QuantityMeasurementEntity> findByOperation(String operation);
+
+    List<QuantityMeasurementEntity> findByErrorTrue();
+
+    long countByOperationAndErrorFalse(String operation);
 }
