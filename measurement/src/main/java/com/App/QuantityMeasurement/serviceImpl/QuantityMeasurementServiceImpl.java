@@ -1,49 +1,204 @@
 package com.App.QuantityMeasurement.serviceImpl;
+
 import com.App.QuantityMeasurement.dto.QuantityDTO;
+import com.App.QuantityMeasurement.enums.IMeasurable;
+import com.App.QuantityMeasurement.enumsimplm.LengthUnit;
+import com.App.QuantityMeasurement.enumsimplm.TemperatureUnit;
+import com.App.QuantityMeasurement.enumsimplm.VolumeUnit;
+import com.App.QuantityMeasurement.enumsimplm.WeightUnit;
+import com.App.QuantityMeasurement.model.Quantity;
 import com.App.QuantityMeasurement.model.QuantityMeasurementEntity;
 import com.App.QuantityMeasurement.repository.QuantityMeasurementRepository;
 import com.App.QuantityMeasurement.service.QuantityMeasurementService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+
 @Service
-public class QuantityMeasurementServiceImpl
-        implements QuantityMeasurementService {
+public class QuantityMeasurementServiceImpl implements QuantityMeasurementService {
+
     private final QuantityMeasurementRepository repository;
-    public QuantityMeasurementServiceImpl(QuantityMeasurementRepository
-                                                  repository) {
+
+    public QuantityMeasurementServiceImpl(QuantityMeasurementRepository repository) {
         this.repository = repository;
     }
-    @Override
-    public QuantityDTO add(QuantityDTO q1, QuantityDTO q2) {
-// Replace with your UC16 logic
-        QuantityDTO result = new QuantityDTO(
-                q1.getValue() + q2.getValue(),
-                q1.getUnit(),
-                q1.getMeasurementType()
-        );
-        repository.save(new QuantityMeasurementEntity(
-                null,
-                "ADD",
-                q1.toString() + ", " + q2.toString(),
-                result.toString(),
-                false
-        ));
-        return result;
 
+    // ==========================================
+    // Helper Method: Create Quantity from DTO
+    // Supports Length, Temperature, Weight, Volume
+    // ==========================================
+    private Quantity<? extends IMeasurable> createQuantity(QuantityDTO dto) {
+
+        String measurementType = dto.getMeasurementType();
+        String unitName = dto.getUnit().toUpperCase();
+
+        switch (measurementType) {
+
+            case "LengthUnit":
+                return new Quantity<>(
+                        dto.getValue(),
+                        LengthUnit.valueOf(unitName)
+                );
+
+            case "TemperatureUnit":
+                return new Quantity<>(
+                        dto.getValue(),
+                        TemperatureUnit.valueOf(unitName)
+                );
+
+            case "WeightUnit":
+                return new Quantity<>(
+                        dto.getValue(),
+                        WeightUnit.valueOf(unitName)
+                );
+
+            case "VolumeUnit":
+                return new Quantity<>(
+                        dto.getValue(),
+                        VolumeUnit.valueOf(unitName)
+                );
+
+            default:
+                throw new IllegalArgumentException(
+                        "Unsupported measurement type: " + measurementType
+                );
+        }
     }
+
+    // ==========================================
+    // ADD
+    // ==========================================
     @Override
-    public QuantityDTO subtract(QuantityDTO q1, QuantityDTO q2) {
-        return null; // Paste UC16 logic
+    @SuppressWarnings("unchecked")
+    public QuantityDTO add(QuantityDTO first, QuantityDTO second) {
+
+        Quantity<IMeasurable> q1 =
+                (Quantity<IMeasurable>) createQuantity(first);
+
+        Quantity<IMeasurable> q2 =
+                (Quantity<IMeasurable>) createQuantity(second);
+
+        Quantity<IMeasurable> result = q1.add(q2);
+
+        return new QuantityDTO(
+                result.getValue(),
+                ((Enum<?>) result.getUnit()).name(),
+                result.getUnit().getClass().getSimpleName()
+        );
     }
+
+    // ==========================================
+    // SUBTRACT
+    // ==========================================
     @Override
-    public QuantityDTO divide(QuantityDTO q1, QuantityDTO q2) {
-        return null;
+    @SuppressWarnings("unchecked")
+    public QuantityDTO subtract(QuantityDTO first, QuantityDTO second) {
+
+        Quantity<IMeasurable> q1 =
+                (Quantity<IMeasurable>) createQuantity(first);
+
+        Quantity<IMeasurable> q2 =
+                (Quantity<IMeasurable>) createQuantity(second);
+
+        Quantity<IMeasurable> result = q1.subtract(q2);
+
+        return new QuantityDTO(
+                result.getValue(),
+                ((Enum<?>) result.getUnit()).name(),
+                result.getUnit().getClass().getSimpleName()
+        );
     }
+
+    // ==========================================
+    // DIVIDE
+    // ==========================================
     @Override
-    public QuantityDTO convert(QuantityDTO input, String targetUnit) {
-        return null;
+    @SuppressWarnings("unchecked")
+    public QuantityDTO divide(QuantityDTO first, QuantityDTO second) {
+
+        Quantity<IMeasurable> q1 =
+                (Quantity<IMeasurable>) createQuantity(first);
+
+        Quantity<IMeasurable> q2 =
+                (Quantity<IMeasurable>) createQuantity(second);
+
+        double result = q1.divide(q2);
+
+        return new QuantityDTO(
+                result,
+                "NUMBER",
+                "Arithmetic"
+        );
     }
+
+    // ==========================================
+    // COMPARE
+    // ==========================================
     @Override
-    public QuantityDTO compareEquality(QuantityDTO q1, QuantityDTO q2) {
-        return null;
+    @SuppressWarnings("unchecked")
+    public QuantityDTO compareEquality(QuantityDTO first, QuantityDTO second) {
+
+        Quantity<IMeasurable> q1 =
+                (Quantity<IMeasurable>) createQuantity(first);
+
+        Quantity<IMeasurable> q2 =
+                (Quantity<IMeasurable>) createQuantity(second);
+
+        boolean isEqual = q1.equals(q2);
+
+        return new QuantityDTO(
+                isEqual ? 0.0 : 1.0,
+                "BOOLEAN",
+                "Comparison"
+        );
+    }
+
+    // ==========================================
+    // CONVERT
+    // ==========================================
+    @Override
+    @SuppressWarnings("unchecked")
+    public QuantityDTO convert(QuantityDTO source, String targetUnit) {
+
+        Quantity<IMeasurable> quantity =
+                (Quantity<IMeasurable>) createQuantity(source);
+
+        QuantityDTO targetDto = new QuantityDTO(
+                0.0,
+                targetUnit,
+                source.getMeasurementType()
+        );
+
+        Quantity<IMeasurable> targetQuantity =
+                (Quantity<IMeasurable>) createQuantity(targetDto);
+
+        Quantity<IMeasurable> converted =
+                quantity.convertTo(targetQuantity.getUnit());
+
+        return new QuantityDTO(
+                converted.getValue(),
+                ((Enum<?>) converted.getUnit()).name(),
+                converted.getUnit().getClass().getSimpleName()
+        );
+    }
+
+    // ==========================================
+    // HISTORY METHODS
+    // ==========================================
+    @Override
+    public List<QuantityMeasurementEntity> getAllMeasurements() {
+        return repository.findAll();
+    }
+
+    @Override
+    public List<QuantityMeasurementEntity> getHistoryByOperation(String operation) {
+        // Temporary implementation: returns all records
+        return repository.findAll();
+    }
+
+    @Override
+    public long getCountByOperation(String operation) {
+        // Temporary implementation: returns total count
+        return repository.findAll().size();
     }
 }
