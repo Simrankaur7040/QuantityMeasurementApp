@@ -1,5 +1,3 @@
-
-
 package com.App.QuantityMeasurement.service;
 
 import com.App.QuantityMeasurement.dto.QuantityDTO;
@@ -23,6 +21,13 @@ public interface QuantityMeasurementService {
     QuantityDTO divide(
             QuantityDTO first,
             QuantityDTO second
+    );
+
+    // NEW
+    QuantityDTO addAndConvert(
+            QuantityDTO first,
+            QuantityDTO second,
+            String targetUnit
     );
 
     // Comparison and Conversion

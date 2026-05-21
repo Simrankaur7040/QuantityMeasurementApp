@@ -15,22 +15,28 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class QuantityMeasurementServiceImpl implements QuantityMeasurementService {
+public class QuantityMeasurementServiceImpl
+        implements QuantityMeasurementService {
 
     private final QuantityMeasurementRepository repository;
 
-    public QuantityMeasurementServiceImpl(QuantityMeasurementRepository repository) {
+    public QuantityMeasurementServiceImpl(
+            QuantityMeasurementRepository repository) {
+
         this.repository = repository;
     }
 
     // ==========================================
-    // Helper Method: Create Quantity from DTO
-    // Supports Length, Temperature, Weight, Volume
+    // Helper Method
     // ==========================================
-    private Quantity<? extends IMeasurable> createQuantity(QuantityDTO dto) {
+    private Quantity<? extends IMeasurable>
+    createQuantity(QuantityDTO dto) {
 
-        String measurementType = dto.getMeasurementType();
-        String unitName = dto.getUnit().toUpperCase();
+        String measurementType =
+                dto.getMeasurementType();
+
+        String unitName =
+                dto.getUnit().toUpperCase();
 
         switch (measurementType) {
 
@@ -60,7 +66,8 @@ public class QuantityMeasurementServiceImpl implements QuantityMeasurementServic
 
             default:
                 throw new IllegalArgumentException(
-                        "Unsupported measurement type: " + measurementType
+                        "Unsupported measurement type: "
+                                + measurementType
                 );
         }
     }
@@ -70,20 +77,27 @@ public class QuantityMeasurementServiceImpl implements QuantityMeasurementServic
     // ==========================================
     @Override
     @SuppressWarnings("unchecked")
-    public QuantityDTO add(QuantityDTO first, QuantityDTO second) {
+    public QuantityDTO add(
+            QuantityDTO first,
+            QuantityDTO second) {
 
         Quantity<IMeasurable> q1 =
-                (Quantity<IMeasurable>) createQuantity(first);
+                (Quantity<IMeasurable>)
+                        createQuantity(first);
 
         Quantity<IMeasurable> q2 =
-                (Quantity<IMeasurable>) createQuantity(second);
+                (Quantity<IMeasurable>)
+                        createQuantity(second);
 
-        Quantity<IMeasurable> result = q1.add(q2);
+        Quantity<IMeasurable> result =
+                q1.add(q2);
 
         return new QuantityDTO(
                 result.getValue(),
                 ((Enum<?>) result.getUnit()).name(),
-                result.getUnit().getClass().getSimpleName()
+                result.getUnit()
+                        .getClass()
+                        .getSimpleName()
         );
     }
 
@@ -92,20 +106,27 @@ public class QuantityMeasurementServiceImpl implements QuantityMeasurementServic
     // ==========================================
     @Override
     @SuppressWarnings("unchecked")
-    public QuantityDTO subtract(QuantityDTO first, QuantityDTO second) {
+    public QuantityDTO subtract(
+            QuantityDTO first,
+            QuantityDTO second) {
 
         Quantity<IMeasurable> q1 =
-                (Quantity<IMeasurable>) createQuantity(first);
+                (Quantity<IMeasurable>)
+                        createQuantity(first);
 
         Quantity<IMeasurable> q2 =
-                (Quantity<IMeasurable>) createQuantity(second);
+                (Quantity<IMeasurable>)
+                        createQuantity(second);
 
-        Quantity<IMeasurable> result = q1.subtract(q2);
+        Quantity<IMeasurable> result =
+                q1.subtract(q2);
 
         return new QuantityDTO(
                 result.getValue(),
                 ((Enum<?>) result.getUnit()).name(),
-                result.getUnit().getClass().getSimpleName()
+                result.getUnit()
+                        .getClass()
+                        .getSimpleName()
         );
     }
 
@@ -114,13 +135,17 @@ public class QuantityMeasurementServiceImpl implements QuantityMeasurementServic
     // ==========================================
     @Override
     @SuppressWarnings("unchecked")
-    public QuantityDTO divide(QuantityDTO first, QuantityDTO second) {
+    public QuantityDTO divide(
+            QuantityDTO first,
+            QuantityDTO second) {
 
         Quantity<IMeasurable> q1 =
-                (Quantity<IMeasurable>) createQuantity(first);
+                (Quantity<IMeasurable>)
+                        createQuantity(first);
 
         Quantity<IMeasurable> q2 =
-                (Quantity<IMeasurable>) createQuantity(second);
+                (Quantity<IMeasurable>)
+                        createQuantity(second);
 
         double result = q1.divide(q2);
 
@@ -130,19 +155,63 @@ public class QuantityMeasurementServiceImpl implements QuantityMeasurementServic
                 "Arithmetic"
         );
     }
+    @Override
+    @SuppressWarnings("unchecked")
+    public QuantityDTO addAndConvert(
+            QuantityDTO first,
+            QuantityDTO second,
+            String targetUnit) {
+
+        Quantity<IMeasurable> q1 =
+                (Quantity<IMeasurable>)
+                        createQuantity(first);
+
+        Quantity<IMeasurable> q2 =
+                (Quantity<IMeasurable>)
+                        createQuantity(second);
+
+        QuantityDTO targetDto =
+                new QuantityDTO(
+                        0.0,
+                        targetUnit,
+                        first.getMeasurementType()
+                );
+
+        Quantity<IMeasurable> targetQuantity =
+                (Quantity<IMeasurable>)
+                        createQuantity(targetDto);
+
+        Quantity<IMeasurable> result =
+                q1.add(
+                        q2,
+                        targetQuantity.getUnit()
+                );
+
+        return new QuantityDTO(
+                result.getValue(),
+                ((Enum<?>) result.getUnit()).name(),
+                result.getUnit()
+                        .getClass()
+                        .getSimpleName()
+        );
+    }
 
     // ==========================================
     // COMPARE
     // ==========================================
     @Override
     @SuppressWarnings("unchecked")
-    public QuantityDTO compareEquality(QuantityDTO first, QuantityDTO second) {
+    public QuantityDTO compareEquality(
+            QuantityDTO first,
+            QuantityDTO second) {
 
         Quantity<IMeasurable> q1 =
-                (Quantity<IMeasurable>) createQuantity(first);
+                (Quantity<IMeasurable>)
+                        createQuantity(first);
 
         Quantity<IMeasurable> q2 =
-                (Quantity<IMeasurable>) createQuantity(second);
+                (Quantity<IMeasurable>)
+                        createQuantity(second);
 
         boolean isEqual = q1.equals(q2);
 
@@ -158,47 +227,61 @@ public class QuantityMeasurementServiceImpl implements QuantityMeasurementServic
     // ==========================================
     @Override
     @SuppressWarnings("unchecked")
-    public QuantityDTO convert(QuantityDTO source, String targetUnit) {
+    public QuantityDTO convert(
+            QuantityDTO source,
+            String targetUnit) {
 
         Quantity<IMeasurable> quantity =
-                (Quantity<IMeasurable>) createQuantity(source);
+                (Quantity<IMeasurable>)
+                        createQuantity(source);
 
-        QuantityDTO targetDto = new QuantityDTO(
-                0.0,
-                targetUnit,
-                source.getMeasurementType()
-        );
+        QuantityDTO targetDto =
+                new QuantityDTO(
+                        0.0,
+                        targetUnit,
+                        source.getMeasurementType()
+                );
 
         Quantity<IMeasurable> targetQuantity =
-                (Quantity<IMeasurable>) createQuantity(targetDto);
+                (Quantity<IMeasurable>)
+                        createQuantity(targetDto);
 
         Quantity<IMeasurable> converted =
-                quantity.convertTo(targetQuantity.getUnit());
+                quantity.convertTo(
+                        targetQuantity.getUnit()
+                );
 
         return new QuantityDTO(
                 converted.getValue(),
                 ((Enum<?>) converted.getUnit()).name(),
-                converted.getUnit().getClass().getSimpleName()
+                converted.getUnit()
+                        .getClass()
+                        .getSimpleName()
         );
     }
 
     // ==========================================
-    // HISTORY METHODS
+    // HISTORY
     // ==========================================
     @Override
-    public List<QuantityMeasurementEntity> getAllMeasurements() {
+    public List<QuantityMeasurementEntity>
+    getAllMeasurements() {
+
         return repository.findAll();
     }
 
     @Override
-    public List<QuantityMeasurementEntity> getHistoryByOperation(String operation) {
-        // Temporary implementation: returns all records
+    public List<QuantityMeasurementEntity>
+    getHistoryByOperation(
+            String operation) {
+
         return repository.findAll();
     }
 
     @Override
-    public long getCountByOperation(String operation) {
-        // Temporary implementation: returns total count
+    public long getCountByOperation(
+            String operation) {
+
         return repository.findAll().size();
     }
 }

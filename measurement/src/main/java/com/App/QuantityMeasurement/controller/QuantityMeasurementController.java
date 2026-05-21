@@ -1,86 +1,81 @@
 package com.App.QuantityMeasurement.controller;
 
 import com.App.QuantityMeasurement.dto.QuantityDTO;
-import com.App.QuantityMeasurement.dto.QuantityInputDTO;
+import com.App.QuantityMeasurement.dto.QuantityRequestDTO;
 import com.App.QuantityMeasurement.service.QuantityMeasurementService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/quantities")
-@SecurityRequirement(name = "Bearer Authentication")
+@CrossOrigin(origins = "http://localhost:5173")
 public class QuantityMeasurementController {
 
-    private final QuantityMeasurementService service;
+    @Autowired
+    private QuantityMeasurementService service;
 
-    public QuantityMeasurementController(
-            QuantityMeasurementService service) {
-        this.service = service;
-    }
-
+    // ADD + CONVERT
     @PostMapping("/add")
     public QuantityDTO add(
-            @RequestBody QuantityInputDTO input) {
+            @RequestBody QuantityRequestDTO request) {
+
+        if (request.getTargetUnit() != null
+                && !request.getTargetUnit().isEmpty()) {
+
+            return service.addAndConvert(
+                    request.getThisQuantityDTO(),
+                    request.getThatQuantityDTO(),
+                    request.getTargetUnit()
+            );
+        }
+
         return service.add(
-                input.getThisQuantityDTO(),
-                input.getThatQuantityDTO()
+                request.getThisQuantityDTO(),
+                request.getThatQuantityDTO()
         );
     }
 
+    // SUBTRACT
     @PostMapping("/subtract")
     public QuantityDTO subtract(
-            @RequestBody QuantityInputDTO input) {
+            @RequestBody QuantityRequestDTO request) {
+
         return service.subtract(
-                input.getThisQuantityDTO(),
-                input.getThatQuantityDTO()
+                request.getThisQuantityDTO(),
+                request.getThatQuantityDTO()
         );
     }
 
+    // DIVIDE
     @PostMapping("/divide")
     public QuantityDTO divide(
-            @RequestBody QuantityInputDTO input) {
+            @RequestBody QuantityRequestDTO request) {
+
         return service.divide(
-                input.getThisQuantityDTO(),
-                input.getThatQuantityDTO()
+                request.getThisQuantityDTO(),
+                request.getThatQuantityDTO()
         );
     }
 
+    // COMPARE
     @PostMapping("/compare")
     public QuantityDTO compare(
-            @RequestBody QuantityInputDTO input) {
+            @RequestBody QuantityRequestDTO request) {
+
         return service.compareEquality(
-                input.getThisQuantityDTO(),
-                input.getThatQuantityDTO()
+                request.getThisQuantityDTO(),
+                request.getThatQuantityDTO()
         );
     }
 
+    // CONVERT
     @PostMapping("/convert")
     public QuantityDTO convert(
-            @RequestBody QuantityInputDTO input) {
+            @RequestBody QuantityRequestDTO request) {
+
         return service.convert(
-                input.getThisQuantityDTO(),
-                input.getThatQuantityDTO().getUnit()
+                request.getThisQuantityDTO(),
+                request.getTargetUnit()
         );
-    }
-
-    // =========================
-    // History Endpoints
-    // =========================
-
-    @GetMapping("/history")
-    public Object getAllHistory() {
-        return service.getAllMeasurements();
-    }
-
-    @GetMapping("/history/operation/{operation}")
-    public Object getHistoryByOperation(
-            @PathVariable String operation) {
-        return service.getHistoryByOperation(operation);
-    }
-
-    @GetMapping("/count/{operation}")
-    public long getCountByOperation(
-            @PathVariable String operation) {
-        return service.getCountByOperation(operation);
     }
 }
